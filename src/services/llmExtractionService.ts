@@ -1,4 +1,5 @@
 import { ExtractedData } from '../types';
+import LLM from "./llm.ts";
 
 const EXTRACTION_PROMPT = `Tu es un assistant spécialisé dans l'extraction de données depuis des documents relatifs à des chantiers de parcs éoliens.
 
@@ -48,42 +49,29 @@ Format attendu :
   "work_order": { "title": "...", "description": "...", ... }
 }`;
 
-export async function extractDataWithLLM(text: string, apiKey?: string): Promise<ExtractedData> {
+export async function extractDataWithLLM(
+  text: string,
+  apiKey?: string
+): Promise<ExtractedData> {
+  // fallback simulation if no API key
   if (!apiKey) {
     return simulateExtraction(text);
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          { role: 'system', content: EXTRACTION_PROMPT },
-          { role: 'user', content: `Document à analyser :\n\n${text}` },
-        ],
-        temperature: 0.1,
-        response_format: { type: 'json_object' },
-      }),
-    });
+    // instantiate the LLM class
+    const extractor = new LLM({ apiKey });
 
-    if (!response.ok) {
-      throw new Error(`LLM API error: ${response.statusText}`);
-    }
+    // use the class to parse the text
+    const result = await extractor.parseText(text, EXTRACTION_PROMPT);
 
-    const result = await response.json();
-    const extractedText = result.choices[0].message.content;
-
-    return JSON.parse(extractedText);
+    return result as ExtractedData;
   } catch (error) {
-    console.error('LLM extraction error:', error);
+    console.error("LLM extraction error:", error);
     return simulateExtraction(text);
   }
 }
+
 
 function simulateExtraction(text: string): ExtractedData {
   const lowerText = text.toLowerCase();
