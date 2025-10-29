@@ -1,13 +1,67 @@
-import { Building2, Users, Briefcase, Check, X } from 'lucide-react';
+import { Building2, Users, Check, X, Trash2 } from 'lucide-react';
 import { ExtractedData } from '../types';
 
 interface DataReviewProps {
   data: ExtractedData;
   onAccept: () => void;
   onReject: () => void;
+  onChange?: (data: ExtractedData) => void;
+  onTemplateUpload?: (file: File) => void;
+  onGenerateDocument?: () => void;
+  hasTemplate?: boolean;
 }
 
-export function DataReview({ data, onAccept, onReject }: DataReviewProps) {
+export function DataReview({ 
+  data, 
+  onAccept, 
+  onReject,
+  onChange
+}: DataReviewProps) {
+
+  const updateWorker = (index: number, field: string, value: string) => {
+    if (!onChange || !data.workers) return;
+    
+    const workers = data.workers.map((worker, idx) => 
+      idx === index ? { ...worker, [field]: value } : worker
+    );
+    onChange({ ...data, workers });
+  };
+
+  const updateCertification = (workerIdx: number, certIdx: number, field: string, value: string | null) => {
+    if (!onChange || !data.workers) return;
+    
+    const workers = data.workers.map((worker, wIdx) => {
+      if (wIdx !== workerIdx || !worker.certifications) return worker;
+      
+      const certifications = worker.certifications.map((cert, cIdx) => 
+        cIdx === certIdx ? { ...cert, [field]: value } : cert
+      );
+      return { ...worker, certifications };
+    });
+    
+    onChange({ ...data, workers });
+  };
+
+  const removeCertification = (workerIdx: number, certIdx: number) => {
+    if (!onChange || !data.workers || !confirm('Supprimer cette certification ?')) return;
+    
+    const workers = data.workers.map((worker, wIdx) => {
+      if (wIdx !== workerIdx || !worker.certifications) return worker;
+      return {
+        ...worker,
+        certifications: worker.certifications.filter((_cert, cIdx) => cIdx !== certIdx)
+      };
+    });
+    
+    onChange({ ...data, workers });
+  };
+
+  const removeWorker = (index: number) => {
+    if (!onChange || !data.workers || !confirm('Supprimer cet intervenant ?')) return;
+    
+    const workers = data.workers.filter((_worker, idx) => idx !== index);
+    onChange({ ...data, workers });
+  };
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -90,36 +144,106 @@ export function DataReview({ data, onAccept, onReject }: DataReviewProps) {
             </h3>
           </div>
           <div className="space-y-4">
-            {data.workers.map((worker, index) => (
+            {data.workers.map((worker, workerIndex) => (
               <div
-                key={index}
-                className="bg-gray-50 rounded p-3 text-sm space-y-2"
+                key={workerIndex}
+                className="bg-gray-50 rounded p-4 text-sm space-y-3 border border-gray-200"
               >
-                <div className="font-medium text-gray-900">
-                  {worker.first_name} {worker.last_name}
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Prénom</label>
+                      <input
+                        type="text"
+                        value={worker.first_name}
+                        onChange={(e) => updateWorker(workerIndex, 'first_name', e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Nom</label>
+                      <input
+                        type="text"
+                        value={worker.last_name}
+                        onChange={(e) => updateWorker(workerIndex, 'last_name', e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Téléphone</label>
+                      <input
+                        type="text"
+                        value={worker.phone || ''}
+                        onChange={(e) => updateWorker(workerIndex, 'phone', e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={worker.email || ''}
+                        onChange={(e) => updateWorker(workerIndex, 'email', e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeWorker(workerIndex)}
+                    className="ml-2 p-1 text-red-600 hover:bg-red-50 rounded"
+                    title="Supprimer l'intervenant"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-gray-600">
-                  {worker.phone && <div>Tél: {worker.phone}</div>}
-                  {worker.email && <div>Email: {worker.email}</div>}
-                </div>
+
                 {worker.certifications && worker.certifications.length > 0 && (
-                  <div className="mt-2">
-                    <div className="text-xs font-medium text-gray-500 mb-1">
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="text-xs font-medium text-gray-700 mb-2">
                       Habilitations:
                     </div>
-                    <ul className="space-y-1 text-xs">
+                    <div className="space-y-2">
                       {worker.certifications.map((cert, certIndex) => (
-                        <li key={certIndex} className="flex justify-between">
-                          <span>{cert.certification_name}</span>
-                          <span className="text-gray-500">
-                            Expire le:{' '}
-                            {new Date(cert.expiry_date).toLocaleDateString(
-                              'fr-FR'
-                            )}
-                          </span>
-                        </li>
+                        <div key={certIndex} className="flex gap-2 items-start bg-white p-2 rounded border border-gray-200">
+                          <div className="flex-1 grid grid-cols-3 gap-2">
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Type</label>
+                              <input
+                                type="text"
+                                value={cert.certification_type}
+                                onChange={(e) => updateCertification(workerIndex, certIndex, 'certification_type', e.target.value)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Nom</label>
+                              <input
+                                type="text"
+                                value={cert.certification_name}
+                                onChange={(e) => updateCertification(workerIndex, certIndex, 'certification_name', e.target.value)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Date d'expiration</label>
+                              <input
+                                type="date"
+                                value={cert.expiry_date || ''}
+                                onChange={(e) => updateCertification(workerIndex, certIndex, 'expiry_date', e.target.value || null)}
+                                className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              />
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => removeCertification(workerIndex, certIndex)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded mt-5"
+                            title="Supprimer la certification"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
               </div>
@@ -128,52 +252,6 @@ export function DataReview({ data, onAccept, onReject }: DataReviewProps) {
         </div>
       )}
 
-      {data.work_order && (
-        <div className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Briefcase className="w-5 h-5 text-blue-600" />
-            <h3 className="font-semibold text-gray-900">Ordre de travail</h3>
-          </div>
-          <dl className="grid grid-cols-2 gap-3 text-sm">
-            <div className="col-span-2">
-              <dt className="font-medium text-gray-500">Titre</dt>
-              <dd className="text-gray-900">{data.work_order.title}</dd>
-            </div>
-            {data.work_order.description && (
-              <div className="col-span-2">
-                <dt className="font-medium text-gray-500">Description</dt>
-                <dd className="text-gray-900">{data.work_order.description}</dd>
-              </div>
-            )}
-            {data.work_order.start_date && (
-              <div>
-                <dt className="font-medium text-gray-500">Date de début</dt>
-                <dd className="text-gray-900">
-                  {new Date(data.work_order.start_date).toLocaleDateString(
-                    'fr-FR'
-                  )}
-                </dd>
-              </div>
-            )}
-            {data.work_order.end_date && (
-              <div>
-                <dt className="font-medium text-gray-500">Date de fin</dt>
-                <dd className="text-gray-900">
-                  {new Date(data.work_order.end_date).toLocaleDateString(
-                    'fr-FR'
-                  )}
-                </dd>
-              </div>
-            )}
-            {data.work_order.work_hours && (
-              <div className="col-span-2">
-                <dt className="font-medium text-gray-500">Horaires</dt>
-                <dd className="text-gray-900">{data.work_order.work_hours}</dd>
-              </div>
-            )}
-          </dl>
-        </div>
-      )}
     </div>
   );
 }

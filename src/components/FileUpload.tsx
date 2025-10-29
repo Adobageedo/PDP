@@ -4,9 +4,10 @@ import { useState } from 'react';
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   isProcessing?: boolean;
+  processingStatus?: string;
 }
 
-export function FileUpload({ onFileSelect, isProcessing = false }: FileUploadProps) {
+export function FileUpload({ onFileSelect, isProcessing = false, processingStatus = '' }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -76,12 +77,21 @@ export function FileUpload({ onFileSelect, isProcessing = false }: FileUploadPro
         <p className="text-lg font-medium text-gray-700 mb-2">
           {isProcessing ? 'Traitement en cours...' : 'Importer un fichier'}
         </p>
-        <p className="text-sm text-gray-500">
-          Glissez-déposez ou cliquez pour sélectionner
-        </p>
-        <p className="text-xs text-gray-400 mt-2">
-          Formats acceptés: .eml, .pdf, .txt
-        </p>
+        {processingStatus && (
+          <p className="text-sm font-medium text-blue-600 mb-2 animate-pulse">
+            {processingStatus}
+          </p>
+        )}
+        {!isProcessing && (
+          <>
+            <p className="text-sm text-gray-500">
+              Glissez-déposez ou cliquez pour sélectionner
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Formats acceptés: .eml, .pdf, .txt
+            </p>
+          </>
+        )}
       </label>
     </div>
   );

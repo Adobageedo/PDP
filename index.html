@@ -5,6 +5,36 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Qualification Document Automation</title>
+    <script>
+      // Polyfills must be available BEFORE any module loads
+      window.global = window;
+      
+      // Mock process object with common properties
+      window.process = {
+        env: {},
+        version: 'v16.0.0',
+        versions: { node: '16.0.0' },
+        platform: 'browser',
+        browser: true,
+        nextTick: function(callback) {
+          Promise.resolve().then(callback);
+        },
+        cwd: function() { return '/'; },
+        stderr: {},
+        stdout: {},
+        stdin: {}
+      };
+      
+      // Simple setImmediate polyfill
+      if (!window.setImmediate) {
+        window.setImmediate = function(callback) {
+          return setTimeout(callback, 0);
+        };
+        window.clearImmediate = function(id) {
+          clearTimeout(id);
+        };
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

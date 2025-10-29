@@ -5,7 +5,7 @@ const EXTRACTION_PROMPT = `Tu es un assistant spécialisé dans l'extraction de 
 
 Tu dois extraire les informations suivantes et les retourner sous forme de JSON valide :
 
-1. **Entreprise** (company) :
+1. **Entreprise** (company) qui realisera les travaux:
    - name (nom de l'entreprise)
    - address (adresse complète)
    - phone (numéro de téléphone)
@@ -13,7 +13,7 @@ Tu dois extraire les informations suivantes et les retourner sous forme de JSON 
    - legal_representative (représentant légal)
    - hse_responsible (responsable HSE/sécurité)
 
-2. **Intervenants** (workers) - tableau d'objets contenant :
+2. **Intervenants** (workers) - tableau d'objets contenant qui vont intervenir sur site:
    - first_name (prénom)
    - last_name (nom)
    - phone (téléphone)
@@ -23,13 +23,6 @@ Tu dois extraire les informations suivantes et les retourner sous forme de JSON 
      - certification_name (nom spécifique de l'habilitation)
      - issue_date (date de délivrance au format YYYY-MM-DD)
      - expiry_date (date d'expiration au format YYYY-MM-DD)
-
-3. **Ordre de travail** (work_order) :
-   - title (titre de l'intervention)
-   - description (description des travaux)
-   - start_date (date de début au format YYYY-MM-DD)
-   - end_date (date de fin au format YYYY-MM-DD)
-   - work_hours (horaires de travail)
 
 Retourne UNIQUEMENT un objet JSON valide, sans commentaires ni texte additionnel.
 Si une information n'est pas disponible, utilise null.
@@ -45,36 +38,33 @@ Format attendu :
         { "certification_type": "...", "certification_name": "...", "expiry_date": "..." }
       ]
     }
-  ],
-  "work_order": { "title": "...", "description": "...", ... }
+  ]
 }`;
 
 export async function extractDataWithLLM(
   text: string,
   apiKey?: string
 ): Promise<ExtractedData> {
-  // fallback simulation if no API key
-  if (!apiKey) {
+  const openaiKey = apiKey || import.meta.env.VITE_OPENAI_API_KEY;
+  
+  if (!openaiKey) {
+    console.warn('⚠️ No OpenAI API key found, using simulation');
     return simulateExtraction(text);
   }
 
   try {
-    // instantiate the LLM class
-    const extractor = new LLM({ apiKey });
-
-    // use the class to parse the text
+    const extractor = new LLM({ apiKey: openaiKey });
     const result = await extractor.parseText(text, EXTRACTION_PROMPT);
-
+    console.log(`✅ Extracted: ${result.company?.name || 'N/A'} - ${result.workers?.length || 0} workers`);
     return result as ExtractedData;
   } catch (error) {
-    console.error("LLM extraction error:", error);
+    console.error("❌ LLM extraction error:", error);
     return simulateExtraction(text);
   }
 }
 
 
 function simulateExtraction(text: string): ExtractedData {
-  const lowerText = text.toLowerCase();
 
   const companyMatch = text.match(/(?:entreprise|société|company)[:\s]+([^\n]+)/i);
   const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]{2,})/);
@@ -100,14 +90,6 @@ function simulateExtraction(text: string): ExtractedData {
         certifications: [],
       };
     });
-  }
-
-  if (lowerText.includes('travaux') || lowerText.includes('intervention')) {
-    extractedData.work_order = {
-      title: 'Intervention parc éolien',
-      description: 'Extraction automatique - veuillez vérifier et compléter',
-      status: 'pending' as const,
-    };
   }
 
   return extractedData;

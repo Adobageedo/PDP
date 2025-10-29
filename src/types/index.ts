@@ -1,11 +1,11 @@
 export interface Company {
   id?: string;
-  name: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  legal_representative?: string;
-  hse_responsible?: string;
+  name: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  legal_representative: string | null;
+  hse_responsible: string | null;
 }
 
 export interface Worker {
@@ -13,8 +13,8 @@ export interface Worker {
   company_id?: string;
   first_name: string;
   last_name: string;
-  phone?: string;
-  email?: string;
+  phone: string | null;
+  email: string | null;
 }
 
 export interface Certification {
@@ -22,38 +22,15 @@ export interface Certification {
   worker_id?: string;
   certification_type: string;
   certification_name: string;
-  issue_date?: string;
-  expiry_date: string;
+  issue_date: string | null;
+  expiry_date: string | null;
   document_url?: string;
-  status: 'valid' | 'expired' | 'expiring_soon';
-}
-
-export interface WorkOrder {
-  id?: string;
-  company_id?: string;
-  title: string;
-  description?: string;
-  start_date?: string;
-  end_date?: string;
-  work_hours?: string;
-  status: 'pending' | 'approved' | 'in_progress' | 'completed';
+  status?: 'valid' | 'expired' | 'expiring_soon';
 }
 
 export interface ExtractedData {
   company?: Company;
   workers?: Array<Worker & { certifications?: Certification[] }>;
-  work_order?: WorkOrder;
-}
-
-export interface UploadedFile {
-  id?: string;
-  file_name: string;
-  file_type: 'eml' | 'pdf' | 'txt';
-  file_url: string;
-  processing_status: 'pending' | 'processing' | 'completed' | 'failed';
-  extracted_data?: ExtractedData;
-  created_at?: string;
-  processed_at?: string;
 }
 
 export interface CertificationAlert {

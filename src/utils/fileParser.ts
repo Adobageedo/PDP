@@ -1,13 +1,15 @@
-export async function parseFile(file: File): Promise<string> {
+import { parseBrowserEML, extractTextFromParsedEmail } from '../services/browserEmailParser';
+
+export async function parseFile(file: File, apiKey?: string): Promise<string> {
   const fileType = file.name.split('.').pop()?.toLowerCase();
 
   switch (fileType) {
     case 'txt':
       return await parseTextFile(file);
     case 'eml':
-      return await parseEmailFile(file);
+      return await parseEmailFile(file, apiKey);
     case 'pdf':
-      return await parsePdfFile(file);
+      return await parsePdfFile(file, apiKey);
     default:
       throw new Error(`Unsupported file type: ${fileType}`);
   }
@@ -17,24 +19,36 @@ async function parseTextFile(file: File): Promise<string> {
   return await file.text();
 }
 
-async function parseEmailFile(file: File): Promise<string> {
-  const content = await file.text();
-
-  const bodyMatch = content.match(/Content-Type: text\/plain[\s\S]*?\n\n([\s\S]*?)(?=\n--|\n\nContent-Type:|$)/i);
-  if (bodyMatch) {
-    return cleanText(bodyMatch[1]);
+async function parseEmailFile(file: File, apiKey?: string): Promise<string> {
+  try {
+    const parsedEmail = await parseBrowserEML(file);
+    const fullText = await extractTextFromParsedEmail(parsedEmail);
+    return fullText;
+  } catch (error) {
+    console.error('❌ Error parsing EML file:', error);
+    const content = await file.text();
+    return cleanText(content);
   }
-
-  const simpleBodyMatch = content.match(/\n\n([\s\S]+)$/);
-  if (simpleBodyMatch) {
-    return cleanText(simpleBodyMatch[1]);
-  }
-
-  return cleanText(content);
 }
 
-async function parsePdfFile(file: File): Promise<string> {
-  return `[PDF FILE: ${file.name}]\nPDF parsing requires server-side processing. Please use the LLM extraction for PDF content analysis.`;
+async function parsePdfFile(file: File, apiKey?: string): Promise<string> {
+  console.log('📄 PDF file detected:', file.name);
+  console.log('⚠️ Direct PDF upload: PDF text extraction in browser is limited');
+  console.log('💡 Tip: For best results, extract the PDF data beforehand or use EML with PDF attachments');
+  
+  // For now, return a note about the PDF
+  // In the future, we could:
+  // 1. Use pdf.js for text extraction
+  // 2. Send directly to Vision GPT API
+  // 3. Process on a backend server
+  
+  return `[PDF Document: ${file.name}]
+  
+This is a PDF file. For accurate data extraction, please:
+1. Extract text from the PDF manually and paste it, or
+2. Include the PDF as an email attachment in an EML file
+
+The system will process EML files with PDF attachments automatically.`;
 }
 
 function cleanText(text: string): string {
