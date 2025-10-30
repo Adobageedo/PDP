@@ -1,0 +1,73 @@
+Annexe #17 : Ajout Entreprise Externe
+Entreprise Externe 1 (EE1)
+Nom	{company_name}
+Adresse	{company_adress}
+Représentant légal	{company_legal_representant_name}
+Représentant sur site  	{company_legal_representant_name}
+Téléphone 	{company_legal_representant_phone}
+E-mail	{company_legal_representant_email}
+
+Description courte des travaux 
+Toutes les opérations de maintenance préventive et curative dans les éoliennes au titre du contrat de maintenance en vigueur. 
+Durée des travaux 
+Interventions planifiées ou ponctuelles toute au long de l’année. 
+Horaires de travail 
+Début de la journée : 8h 	Fin de la journée : 20h 
+Nombre de travailleurs   
+Interventions par binôme au minimum. Le nombre de travailleurs devra être adapté à la nature et au type d’opération (Cf. mode opératoire fournit par le prestataire de maintenance). Interventions en travailleur isolé tolérées avec la mise en œuvre de procédures répondant aux exigences du code du travail Art R 4224-16, permettant le secours à la personne dans les plus brefs délais. 
+
+Les travailleurs isolés ne sont pas tolérés pour des activités dangereuses et en particulier dans les cas suivants :
+-	Travaux en hauteur
+-	Travaux électriques 
+-	Travaux en espace confiné
+-	Travaux à proximité d'un point d'eau 
+-	Travail de nuit 
+-	Manipulation d'appareil de levage
+L’entreprise externe atteste qu’au jour de la signature du présent document et pendant toute sa durée de validité, l’ensemble de ses salariés pouvant intervenir sur les équipements de l’Entreprise Utilisatrice, ainsi que l’ensemble des salariés des Entreprises Sous-Traitantes listées à la Section II au paragraphe 21 Liste des Sous-traitants des Entreprises Externes 
+Sont soit de nationalité française ou européenne, soit possèdent un titre de séjour et/ou permis de travail pour la France. (Cf. SECTION I – Partie 7 Ressources de nationalité et de langues étrangères):
+•	Possèdent les habilitations suivantes :
+	Travail en hauteur / Evacuation d’urgence (recyclage et délivrance tous les 2 ans)
+	Electrique B0V/H0V - B1/B1V - H1/H1V - B2/B2V - H2/H2V – BC – HC - BR conformément à la norme NF C18-510 (recyclage et délivrance tous les 3 ans)
+	 SST (recyclage tous les 2 ans)
+	Premiers secours Incendie (recyclage tous les 2 ans)
+•	Si leurs interventions le nécessitent, possèdent les habilitations suivantes :
+	Conduite des équipements sous pression (recyclage et délivrance tous les 3 ans)
+	Conduite d’engins – CACES 09 
+•	Ont été informés des risques et des procédures de mise en sécurité des équipements de l’Entreprise Utilisatrice
+•	Sont à jour dans leur visite médicale et ont été déclaré apte par le médecin du travail lors de leur dernière visite médicale
+•	Les EPI (Equipements de Protection Individuels) répondent aux normes et sont contrôlés annuellement par un organisme certifié.
+ L’Entreprise Extérieure 1 s’engage à respecter de manière exhaustive, à tout moment, pendant la durée de validité du présent document, et pour tous ses salariés pouvant intervenir sur les équipements de l’Entreprise Utilisatrice, ainsi que l’ensemble des salariés des Entreprises Sous-Traitantes listées à la Section II au paragraphe 21 Liste des Sous-des Entreprises Externes, les prérequis et habilitations listés ci-dessus.
+L’Entreprise Extérieure 1 s’assurera que les formations ou les habilitations dont la validité prendrait fin dans les 12 prochains mois soient renouvelées dans les conditions requises pour l’exercice de leur métier. Il en sera de même pour leur visite médicale d’aptitude.
+Entreprise Externe 1 (EE1)
+Nom du Mandataire Social  
+{company_legal_representant_name}	Fonction
+Date 
+Signature
+ L’Entreprise Extérieure 1 s’engage à ne pas faire travailler en turbine un technicien dont les formations, habilitations ou équipements indiquées ci-dessus seraient périmées et qui n’aurait pas effectué sa visite médicale périodique et qui n’aurait pas été déclaré apte.
+Les intervenants devront faire parvenir ces documents à l’Entreprise Mandataire sur demande. 
+Dans le cas d’intervenant étranger, l’EU accepte qu’une copie du « safety book » (carnet consignant les habilitations de l’intervenant, en cours de validité, remis par son employeur) soit présentée.
+Un intervenant étranger doit, de plus, être en possession d’un exemplaire du formulaire A1 et d’une copie de la déclaration préalable de détachement (Cf. SECTION I – Partie 7 Ressources de nationalité et de langues étrangères).
+
+ 
+Signature des intervenants de l’entreprise externe ajoutée
+Nom 	Prénom	Date
+{technician1_name}	{technician1_surname}	
+{technician2_name}	{technician2_surname}	
+{technician3_name} to delete if not existent	{technician3_surname}	
+{technician4_name} to delete if not existent	{technician4_surname}	
+{technician5_name} to delete if not existent	{technician5_surname}	
+{technician6_name} to delete if not existent	{technician6_surname}	
+{technician7_name} to delete if not existent	{technician7_surname}	
+{technician8_name} to delete if not existent	{technician8_surname}	
+{technician9_name} to delete if not existent	{technician9_surname}	
+{technician10_name} to delete if not existant	{technician10_surname}	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
