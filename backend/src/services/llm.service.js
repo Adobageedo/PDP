@@ -56,7 +56,7 @@ class LLMService {
    * @private
    */
   buildExtractionPrompt() {
-    return `Tu es un assistant spécialisé dans l'extraction de données depuis des documents relatifs à des chantiers de parcs éoliens.
+    return `Tu es un assistant spécialisé dans l'extraction de données depuis des documents relatifs à des chantiers de parcs éoliens (Plan de Prévention).
 
 INSTRUCTIONS IMPORTANTES :
 - Les certifications sont souvent dans des PDF joints (noms de fichiers comme "GWO-WAH_Elie Amour.pdf", "H0B0_ELIE_2025.pdf")
@@ -66,6 +66,8 @@ INSTRUCTIONS IMPORTANTES :
 - Si tu vois une année seule (ex: "2025"), utilise le 31 décembre de cette année (2025-12-31)
 - Les noms de certifications incluent : GWO (Global Wind Organization), H0B0 (habilitation électrique), First Aid, Working at Heights (WAH), BST, etc.
 - Si un PDF est marqué "[Scanned PDF - text extraction not possible]", utilise UNIQUEMENT les informations du filename
+- CHERCHE si un document "Analyse de Risques" ou "Risk Analysis" est mentionné ou présent
+- CHERCHE si un document "Mode Opératoire" ou "Operational Mode" est mentionné ou présent
 
 Tu dois extraire les informations suivantes et les retourner sous forme de JSON valide :
 
@@ -97,6 +99,10 @@ IMPORTANT POUR LES DATES D'EXPIRATION :
 
 Retourne UNIQUEMENT un objet JSON valide, sans commentaires ni texte additionnel.
 
+3. **Documents requis** (booléens indiquant si les documents sont présents) :
+   - risk_analysis (true si "Analyse de Risques" ou "Risk Analysis" est mentionné, false sinon)
+   - operational_mode (true si "Mode Opératoire" ou "Operational Mode" est mentionné, false sinon)
+
 Format attendu :
 {
   "company": { "name": "...", "address": "...", ... },
@@ -121,7 +127,9 @@ Format attendu :
         }
       ]
     }
-  ]
+  ],
+  "risk_analysis": false,
+  "operational_mode": false
 }
 
 IMPORTANT: Return ONLY valid JSON, no markdown, no code blocks, no explanations.`;

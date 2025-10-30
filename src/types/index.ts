@@ -41,3 +41,27 @@ export interface CertificationAlert {
   days_until_expiry: number;
   status: 'expired' | 'expiring_soon';
 }
+
+export interface PDP {
+  id: string;
+  windfarm_name: string;
+  company?: Company;
+  worker_ids: string[];
+  created_at: string;
+  updated_at: string;
+  file_names: string[];
+  is_active: boolean;
+  risk_analysis: boolean;
+  operational_mode: boolean;
+  generated_document_path?: string | null;
+  template_path?: string | null;
+}
+
+export interface PDPFile {
+  id: string;
+  pdp_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  uploaded_at: string;
+}

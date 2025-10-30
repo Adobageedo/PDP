@@ -8,31 +8,63 @@ const { AppError } = require('../middleware/errorHandler');
  */
 class ExtractionService {
   /**
-   * Process an EML file and extract structured data
-   * @param {Buffer} emlBuffer - EML file buffer
+   * Process a file and extract structured data
+   * @param {Buffer} fileBuffer - File buffer
    * @param {String} filename - Original filename
    * @param {Function} onProgress - Optional progress callback (step, message, data)
    * @returns {Object} Extracted data and metadata
    */
-  async processEMLFile(emlBuffer, filename, onProgress = null) {
+  async processEMLFile(fileBuffer, filename, onProgress = null) {
     try {
-      // Step 1: Parse EML file
-      console.log('📧 [1/3] Parsing EML file...');
-      if (onProgress) onProgress('parsing', 'Parsing EML file...');
+      const fileExtension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
       
-      const parsedEmail = await emlParser.parseEML(emlBuffer);
+      let fullText = '';
+      let metadata = {
+        attachmentsProcessed: 0,
+        textLength: 0,
+        emailSubject: null,
+        emailFrom: null
+      };
+
+      // Handle different file types
+      if (fileExtension === '.eml') {
+        // Step 1: Parse EML file
+        console.log('📧 [1/3] Parsing EML file...');
+        if (onProgress) onProgress('parsing', 'Parsing EML file...');
+        
+        const parsedEmail = await emlParser.parseEML(fileBuffer);
+        
+        if (onProgress) onProgress('parsed', `Found ${parsedEmail.attachments.length} attachments`, {
+          attachmentCount: parsedEmail.attachments.length
+        });
+        
+        // Step 2: Extract text from PDF attachments
+        console.log(`📎 [2/3] Processing ${parsedEmail.attachments.length} attachments...`);
+        if (onProgress) onProgress('extracting', `Processing ${parsedEmail.attachments.length} attachments...`);
+        
+        fullText = await this.buildFullText(parsedEmail, onProgress);
+        
+        metadata.attachmentsProcessed = parsedEmail.attachments.length;
+        metadata.emailSubject = parsedEmail.subject;
+        metadata.emailFrom = parsedEmail.from;
+        
+      } else if (fileExtension === '.pdf') {
+        // Process PDF directly
+        console.log('📄 [1/2] Extracting text from PDF...');
+        if (onProgress) onProgress('extracting', 'Extracting text from PDF...');
+        
+        const pdfText = await pdfExtractor.extractTextFromPDF(fileBuffer, filename);
+        fullText = `PDF File: ${filename}\n\n${pdfText}`;
+        
+      } else if (fileExtension === '.txt') {
+        // Process TXT directly
+        console.log('📝 [1/2] Reading text file...');
+        if (onProgress) onProgress('extracting', 'Reading text file...');
+        
+        fullText = `Text File: ${filename}\n\n${fileBuffer.toString('utf-8')}`;
+      }
       
-      if (onProgress) onProgress('parsed', `Found ${parsedEmail.attachments.length} attachments`, {
-        attachmentCount: parsedEmail.attachments.length
-      });
-      
-      // Step 2: Extract text from PDF attachments
-      console.log(`📎 [2/3] Processing ${parsedEmail.attachments.length} attachments...`);
-      if (onProgress) onProgress('extracting', `Processing ${parsedEmail.attachments.length} attachments...`);
-      
-      const fullText = await this.buildFullText(parsedEmail, onProgress);
-      
-      if (onProgress) onProgress('extracting_body', 'Extracting data from email body...');
+      if (onProgress) onProgress('extracting_body', 'Extracting data from file...');
       
       // Step 3: Extract structured data using LLM
       console.log('🤖 [3/3] Extracting data with LLM...');
@@ -40,18 +72,15 @@ class ExtractionService {
       
       const extractedData = await llmService.extractWindFarmData(fullText);
       
+      metadata.textLength = fullText.length;
+      
       return {
         data: extractedData,
-        metadata: {
-          attachmentsProcessed: parsedEmail.attachments.length,
-          textLength: fullText.length,
-          emailSubject: parsedEmail.subject,
-          emailFrom: parsedEmail.from
-        }
+        metadata
       };
     } catch (error) {
       console.error('❌ Extraction service error:', error);
-      throw new AppError(`Failed to process EML file: ${error.message}`, 500);
+      throw new AppError(`Failed to process file: ${error.message}`, 500);
     }
   }
 

@@ -16,6 +16,11 @@ export default defineConfig({
       protocolImports: true,
     }),
   ],
+  server: {
+    host: '0.0.0.0', // Listen on all network interfaces
+    port: 5173,
+    strictPort: false,
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

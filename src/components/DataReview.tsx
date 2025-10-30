@@ -1,5 +1,6 @@
-import { Building2, Users, Check, X, Trash2 } from 'lucide-react';
+import { Building2, Users, Check, X, Trash2, Edit2 } from 'lucide-react';
 import { ExtractedData } from '../types';
+import { useState } from 'react';
 
 interface DataReviewProps {
   data: ExtractedData;
@@ -17,6 +18,7 @@ export function DataReview({
   onReject,
   onChange
 }: DataReviewProps) {
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const updateWorker = (index: number, field: string, value: string) => {
     if (!onChange || !data.workers) return;
@@ -69,6 +71,24 @@ export function DataReview({
           Données extraites
         </h2>
         <div className="flex gap-2">
+          {!isEditMode && (
+            <button
+              onClick={() => setIsEditMode(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Edit2 className="w-4 h-4" />
+              Modifier
+            </button>
+          )}
+          {isEditMode && (
+            <button
+              onClick={() => setIsEditMode(false)}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Terminer l'édition
+            </button>
+          )}
           <button
             onClick={onReject}
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg flex items-center gap-2 transition-colors"
@@ -92,11 +112,12 @@ export function DataReview({
             <Building2 className="w-5 h-5 text-blue-600" />
             <h3 className="font-semibold text-gray-900">Entreprise</h3>
           </div>
-          <dl className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <dt className="font-medium text-gray-500">Nom</dt>
-              <dd className="text-gray-900">{data.company.name}</dd>
-            </div>
+          {!isEditMode ? (
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="font-medium text-gray-500">Nom</dt>
+                <dd className="text-gray-900">{data.company.name}</dd>
+              </div>
             {data.company.address && (
               <div>
                 <dt className="font-medium text-gray-500">Adresse</dt>
@@ -132,6 +153,11 @@ export function DataReview({
               </div>
             )}
           </dl>
+          ) : (
+            <p className="text-sm text-gray-600 italic">
+              Cliquez sur "Modifier" pour éditer les informations de l'entreprise
+            </p>
+          )}
         </div>
       )}
 
@@ -143,8 +169,13 @@ export function DataReview({
               Intervenants ({data.workers.length})
             </h3>
           </div>
-          <div className="space-y-4">
-            {data.workers.map((worker, workerIndex) => (
+          {!isEditMode ? (
+            <p className="text-sm text-gray-600 italic">
+              Cliquez sur "Modifier" pour éditer les informations des intervenants
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {data.workers.map((worker, workerIndex) => (
               <div
                 key={workerIndex}
                 className="bg-gray-50 rounded p-4 text-sm space-y-3 border border-gray-200"
@@ -247,8 +278,9 @@ export function DataReview({
                   </div>
                 )}
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

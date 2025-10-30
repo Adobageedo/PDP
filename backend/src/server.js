@@ -32,10 +32,11 @@ app.get('/health', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`📍 API endpoint: http://localhost:${PORT}/api`);
   console.log(`💚 Health check: http://localhost:${PORT}/health`);
+  console.log(`🌐 Network access: http://YOUR_IP_ADDRESS:${PORT}/api`);
 });
 
 module.exports = app;

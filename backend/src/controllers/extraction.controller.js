@@ -10,11 +10,15 @@ exports.processEML = async (req, res, next) => {
       throw new AppError('No file uploaded', 400);
     }
 
-    if (req.file.mimetype !== 'message/rfc822' && !req.file.originalname.endsWith('.eml')) {
-      throw new AppError('File must be an EML file', 400);
+    // Accept EML, PDF, and TXT files
+    const allowedExtensions = ['.eml', '.pdf', '.txt'];
+    const fileExtension = req.file.originalname.toLowerCase().substring(req.file.originalname.lastIndexOf('.'));
+    
+    if (!allowedExtensions.includes(fileExtension)) {
+      throw new AppError(`File type not supported. Allowed types: ${allowedExtensions.join(', ')}`, 400);
     }
 
-    console.log(`📧 Processing EML file: ${req.file.originalname} (${(req.file.size / 1024).toFixed(1)} KB)`);
+    console.log(`📄 Processing file: ${req.file.originalname} (${(req.file.size / 1024).toFixed(1)} KB)`);
 
     // Check if client wants SSE streaming
     const useStreaming = req.query.stream === 'true';

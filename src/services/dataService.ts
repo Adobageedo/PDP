@@ -1,4 +1,4 @@
-import { Company, Worker, Certification, ExtractedData } from '../types';
+import { Company, Worker, Certification, ExtractedData, PDP } from '../types';
 import { updateCertificationStatus } from '../utils/certificationValidator';
 
 // Storage keys
@@ -8,6 +8,7 @@ interface StorageData {
   companies: Array<Company & { id: string; created_at: string }>;
   workers: Array<Worker & { id: string; created_at: string }>;
   certifications: Array<Certification & { id: string; created_at: string }>;
+  pdps: Array<PDP>;
 }
 
 // Helper to generate UUID
@@ -19,9 +20,14 @@ function generateId(): string {
 function getStorageData(): StorageData {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
-    return { companies: [], workers: [], certifications: [] };
+    return { companies: [], workers: [], certifications: [], pdps: [] };
   }
-  return JSON.parse(stored);
+  const data = JSON.parse(stored);
+  // Ensure pdps array exists for backward compatibility
+  if (!data.pdps) {
+    data.pdps = [];
+  }
+  return data;
 }
 
 // Save data to localStorage
@@ -196,4 +202,78 @@ export async function deleteCertification(certId: string): Promise<void> {
   const storage = getStorageData();
   storage.certifications = storage.certifications.filter(c => c.id !== certId);
   saveStorageData(storage);
+}
+
+// PDP Management Functions
+export async function createPDP(pdpData: {
+  windfarm_name: string;
+  company?: Company;
+  worker_ids: string[];
+  file_names: string[];
+}): Promise<string> {
+  const storage = getStorageData();
+  const id = generateId();
+  
+  const newPDP: PDP = {
+    id,
+    windfarm_name: pdpData.windfarm_name,
+    company: pdpData.company,
+    worker_ids: pdpData.worker_ids,
+    file_names: pdpData.file_names,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    is_active: true,
+  };
+  
+  storage.pdps.push(newPDP);
+  saveStorageData(storage);
+  
+  return id;
+}
+
+export async function getAllPDPs(): Promise<PDP[]> {
+  const storage = getStorageData();
+  return storage.pdps.sort((a, b) => 
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+}
+
+export async function getPDPById(pdpId: string): Promise<PDP | null> {
+  const storage = getStorageData();
+  return storage.pdps.find(p => p.id === pdpId) || null;
+}
+
+export async function updatePDP(pdpId: string, updates: Partial<PDP>): Promise<void> {
+  const storage = getStorageData();
+  const pdpIndex = storage.pdps.findIndex(p => p.id === pdpId);
+  
+  if (pdpIndex !== -1) {
+    storage.pdps[pdpIndex] = {
+      ...storage.pdps[pdpIndex],
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    saveStorageData(storage);
+  }
+}
+
+export async function deletePDP(pdpId: string): Promise<void> {
+  const storage = getStorageData();
+  storage.pdps = storage.pdps.filter(p => p.id !== pdpId);
+  saveStorageData(storage);
+}
+
+export async function getPDPWorkers(pdpId: string): Promise<Worker[]> {
+  const storage = getStorageData();
+  const pdp = storage.pdps.find(p => p.id === pdpId);
+  
+  if (!pdp) return [];
+  
+  const workers = storage.workers.filter(w => pdp.worker_ids.includes(w.id));
+  
+  // Attach certifications to workers
+  return workers.map(worker => ({
+    ...worker,
+    certifications: storage.certifications.filter(c => c.worker_id === worker.id),
+  }));
 }
